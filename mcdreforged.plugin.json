@@ -1,0 +1,15 @@
+{
+  "id": "smart_servertime",
+  "version": "0.1.0",
+  "name": "SmartServerTime",
+  "description": {
+    "en_us": "A Minecraft Auto Start/Stop Plugin",
+    "zh_cn": "一个Minecraft自动停起服务器插件"
+  },
+  "author": "zyxkad",
+  "link": "https://github.com/kmcsr/smart_servertime_mcdr",
+  "dependencies": {
+    "mcdreforged": ">=2.0.0",
+    "delayexe": ">=1.1.0"
+  }
+}
