@@ -9,7 +9,7 @@ from . import globals as GL
 from .proxy_server import *
 
 __all__ = [
-	'refresh_cooldown', 'stop_cooldown', 'proxy_server', 'start_server'
+	'get_proxy_server', 'refresh_cooldown', 'stop_cooldown', 'proxy_server', 'start_server'
 ]
 
 cooldown_timer = LockedData(None)
@@ -38,11 +38,13 @@ def on_load(server: MCDR.PluginServerInterface):
 	if server.is_server_startup():
 		cooldown_timer.d = new_timer(GL.Config.server_startup_protection * 60, refresh_cooldown)
 
+@new_thread
 def on_unload(server: MCDR.PluginServerInterface):
 	global cooldown_timer
 	if cooldown_timer.d is not None:
 		cooldown_timer.d.cancel()
 		cooldown_timer.d = None
+	get_proxy_server().stop(True)
 
 def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
 	stop_cooldown()
@@ -71,11 +73,13 @@ def proxy_server(source: MCDR.CommandSource):
 	pxs = get_proxy_server()
 	pxs.start(server)
 	pxs.trigger_call(lambda: start_server(server.get_plugin_command_source()))
-	log_info('Server is proxied at {0[0]}:{0[1]}'.format(pxs.addr))
 
 @new_thread
 @new_job('start server', block=True)
 def start_server(source: MCDR.CommandSource):
 	server = source.get_server()
+	if server.is_server_running():
+		send_message(source, MCDR.RText('[WARN] Server is already started', color=MCDR.RColor.yellow))
+		return
 	get_proxy_server().stop()
 	server.start()

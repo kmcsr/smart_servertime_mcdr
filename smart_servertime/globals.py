@@ -17,11 +17,11 @@ class SSTConfig(MCDR.Serializable):
 	# 0:guest 1:user 2:helper 3:admin 4:owner
 	minimum_permission_level: Dict[str, int] = {
 		'help':     0,
-		'query':    0,
+		'wakeup':   4,
 		'stop':     3,
 		'enable':   3,
 		'disable':  3,
-		'abort':    3,
+		'refresh':  3,
 		'reload':   3,
 		'save':     3,
 	}

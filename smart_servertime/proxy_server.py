@@ -2,10 +2,12 @@
 import os
 import threading
 import socket
+import traceback
 
 import mcdreforged.api.all as MCDR
 from .utils import *
 from . import globals as GL
+from .minecraft_server import *
 
 __all__ = [
 	'ProxyServer', 'get_proxy_server'
@@ -16,69 +18,97 @@ class ProxyServer:
 		self._lock = threading.Lock()
 		self._trigger = threading.Condition(threading.Lock())
 		self._trigger_call = []
-		self._status = 0
+		self.__status = 0
 		self._socket = None
+		self._mcserver = None
 
 	@property
 	def running(self):
-		return self._status == 1
+		return self.__status == 1
+
+	@property
+	def finished(self):
+		return self.__status == -1
 
 	@property
 	def addr(self):
-		if self._status != 1:
+		if self.__status != 1:
 			return None, None
 		return self._socket.getsockname()
 
 	@new_thread
 	def _run(self):
+		@MCDR.new_thread('sst_proxy_handler')
+		def h(cli, addr):
+			try:
+				if self._mcserver.handle(cli, addr):
+					log_info('Player [{0[0]}:{0[1]}] trying to join the game'.format(addr))
+					with self._lock:
+						self.__trigger()
+			except ConnectionAbortedError:
+				pass
+			except BaseException as e:
+				# log_info(MCDR.RText('Error when handle[{0[0]}:{0[1]}]: {1}'.format(addr, str(e)), color=MCDR.RColor.red))
+				traceback.print_exc()
+			finally:
+				cli.close()
+
 		self._socket.listen(1)
 		try:
 			while True:
 				cli, addr = self._socket.accept()
-				break # TODO: decode minecraft packets
+				h(cli, addr)
+		except ConnectionAbortedError:
+			pass
 		finally:
 			with self._lock:
 				self.__trigger()
 
 	def start(self, server: MCDR.ServerInterface):
 		assert not server.is_server_running()
-		assert self._status != 1, 'Proxy server is already running'
+		assert self.__status != -1, 'Proxy server is gone'
+		assert self.__status != 1, 'Proxy server is already running'
+		self._mcserver = MinecraftServer(server.get_mcdr_config()['working_directory'])
 		with self._lock:
 			self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			addr = _parse_serverip(server.get_mcdr_config()['working_directory'])
-			self._socket.bind(addr)
-			self._status = 1
+			self._socket.bind(self._mcserver.addr)
+			self.__status = 1
+		log_info('Server is proxied at {0[0]}:{0[1]}'.format(self._mcserver.addr))
 		self._run()
 
-	def stop(self):
+	def stop(self, final: bool = False):
 		with self._lock:
-			self.__trigger()
+			self.__trigger(final=final)
 
 	def wait_trigger(self):
 		with self._trigger:
-			if self._status != 1:
-				return
-			self._trigger.wait()
+			if self.__status == 1:
+				self._trigger.wait()
+			return self.__status == 0
 
-	def trigger_call(self, call, immediately=True):
+	def trigger_call(self, call, immediately: bool = True):
 		with self._trigger:
-			if self._status != 1:
+			if self.__status != 1:
 				if immediately:
 					call()
 				return True
 			self._trigger_call.append(call)
 		return False
 
-	def __trigger(self):
+	def __trigger(self, final: bool = False):
 		with self._trigger:
-			if self._status == 1:
-				self._status = 0
+			if self.__status == 1:
 				self._socket.close()
+				self.__status = -1 if final else 0
 				self._socket = None
-			tc, self._trigger_call = self._trigger_call, []
-			for c in tc:
-				c()
-			self._trigger.notify_all()
+				self._mcserver = None
+				if not final:
+					tc, self._trigger_call = self._trigger_call, []
+					for c in tc:
+						c()
+				else:
+					self._trigger_call = []
+				self._trigger.notify_all()
 
 _proxy_server = ProxyServer()
 
