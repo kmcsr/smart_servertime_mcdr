@@ -3,9 +3,10 @@ import os
 import time
 
 import mcdreforged.api.all as MCDR
+
 import delayexe
-from .utils import *
 from . import globals as GL
+from .utils import *
 from .proxy_server import *
 
 __all__ = [
@@ -17,13 +18,13 @@ cooldown_timer = LockedData(None)
 def _timed_proxy_server():
 	global cooldown_timer
 	cooldown_timer.d = None
-	proxy_server(GL.SERVER_INS.get_plugin_command_source())
+	proxy_server(MCDR.ServerInterface.get_instance().get_plugin_command_source())
 
-def refresh_cooldown():
+def refresh_cooldown(timeout: int = None):
 	with cooldown_timer:
 		if cooldown_timer.d is not None:
 			cooldown_timer.d.cancel()
-		cooldown_timer.d = new_timer(GL.Config.server_cooldown_prepare * 60, _timed_proxy_server)
+		cooldown_timer.d = new_timer((GL.get_config().server_cooldown_prepare if timeout is None else timeout) * 60, _timed_proxy_server)
 
 def stop_cooldown():
 	global cooldown_timer
@@ -35,8 +36,10 @@ def stop_cooldown():
 
 def on_load(server: MCDR.PluginServerInterface):
 	server.register_event_listener(delayexe.ON_PLAYER_EMPTY, lambda *args: refresh_cooldown())
-	if server.is_server_startup():
-		cooldown_timer.d = new_timer(GL.Config.server_startup_protection * 60, refresh_cooldown)
+	# if not server.is_server_running():
+	# 	proxy_server(server.get_plugin_command_source())
+	# else:
+	cooldown_timer.d = new_timer(GL.get_config().server_startup_protection * 60, refresh_cooldown)
 
 @new_thread
 def on_unload(server: MCDR.PluginServerInterface):
@@ -56,13 +59,13 @@ def on_server_start(server: MCDR.PluginServerInterface):
 	with cooldown_timer:
 		if cooldown_timer.d is not None:
 			cooldown_timer.d.cancel()
-		cooldown_timer.d = new_timer(GL.Config.server_startup_protection * 60, refresh_cooldown)
+		cooldown_timer.d = new_timer(GL.get_config().server_startup_protection * 60, refresh_cooldown)
 
 def on_server_stop(server: MCDR.PluginServerInterface, code: int):
 	stop_cooldown()
 
 @new_thread
-@new_job('proxy server')
+@job_mnr.new('proxy server')
 def proxy_server(source: MCDR.CommandSource):
 	stop_cooldown()
 
@@ -75,7 +78,7 @@ def proxy_server(source: MCDR.CommandSource):
 	pxs.trigger_call(lambda: start_server(server.get_plugin_command_source()))
 
 @new_thread
-@new_job('start server', block=True)
+@job_mnr.new('start server', block=True)
 def start_server(source: MCDR.CommandSource):
 	server = source.get_server()
 	if server.is_server_running():

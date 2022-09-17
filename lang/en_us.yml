@@ -1,0 +1,13 @@
+smart_servertime:
+  help_msg: |-
+    {0} help :Show this help message
+    {0} wakeup :Start server
+    {0} stop :Stop server and proxy it
+    {0} enable :Enable this plugin
+    {0} disable :Disable this plugin
+    {0} refresh [timeout = default] :Refresh server cooldown
+    {0} reload :Reload config file
+    {0} save :Save config file
+  refresh:
+    success: Refresh successed
+  
