@@ -12,6 +12,7 @@
 - Support server **cooldown timeout**
 - Support **manually start/stop** your server
 - Support *Minecraft Client Packet*, response ***correctly** ping request*, **send server status to player** who is *tring connect*
+- Supports **reverse proxy** mode _(`enable_proxy` need to be set to `true`)_
 
 ### TODO
 

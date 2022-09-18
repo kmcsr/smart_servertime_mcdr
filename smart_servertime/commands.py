@@ -25,6 +25,7 @@ def command_help(source: MCDR.CommandSource):
 	send_message(source, GL.BIG_BLOCK_BEFOR, tr('help_msg', Prefix), GL.BIG_BLOCK_AFTER, sep='\n')
 
 def command_wakeup(source: MCDR.CommandSource):
+	debug('command wakeup')
 	start_server(source)
 
 def command_stop(source: MCDR.CommandSource):

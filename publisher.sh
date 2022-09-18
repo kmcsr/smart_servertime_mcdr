@@ -24,18 +24,13 @@ cd $(dirname $0)
 echo '==> Reading plugin metadata...'
 echo
 
-_PARSER=$(cat <<EOF
-import json,sys
-o = json.load(open(sys.argv[1],"r"))
-n, d, v, m = o["name"], o["id"], o["version"], o.get("archive_name")
-print((n.replace(" ", "") if n else d) + "-v" + v if not m else m.format(id=d, version=v), v)
-EOF
-)
-_TG='mcdreforged.plugin.json'
-data=($(python3 -c "$_PARSER" "$_TG"))
+data=($(python3 -c "import json
+o = json.load(open('mcdreforged.plugin.json','r'))
+n, d, v, m = o['name'], o['id'], o['version'], o.get('archive_name')
+print((n.replace(' ', '') if n else d) + '-v' + v if not m else m.format(id=d, version=v), v)"))
 if [ $? -ne 0 ]; then
 	echo
-	echo "[ERROR] Cannot parse '${_TG}'"
+	echo "[ERROR] Cannot parse 'mcdreforged.plugin.json'"
 	exit 1
 fi
 name="${data[0]}"

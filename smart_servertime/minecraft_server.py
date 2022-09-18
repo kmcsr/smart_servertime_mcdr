@@ -15,6 +15,7 @@ class MinecraftServer:
 		self._properties = Properties(os.path.join(self._base, 'server.properties'))
 		self._addr = (self._properties.get_str('server-ip', '0.0.0.0'), self._properties.get_int('server-port', 25565))
 		self._modt = self._properties.get_str('motd', 'A Stopped Minecraft Server')
+		self._max_players = self._properties.get_int('max-players', 20)
 
 	@property
 	def base(self):
@@ -35,6 +36,10 @@ class MinecraftServer:
 	@modt.setter
 	def modt(self, modt: str):
 		self._modt = modt
+
+	@property
+	def max_players(self):
+		return self._max_players
 
 	def handle(self, conn, addr):
 		_, pid, data = recv_package(conn)

@@ -1,0 +1,13 @@
+smart_servertime:
+  help_msg: |-
+    {0} help :显示此帮助消息
+    {0} wakeup :唤醒服务器
+    {0} stop :停止服务器, 并代理端口
+    {0} enable :启用插件
+    {0} disable :禁用插件
+    {0} refresh [timeout = default] :刷新服务器冷却时间
+    {0} reload :重载配置文件
+    {0} save :保存配置文件
+  refresh:
+    success: 刷新成功
+  

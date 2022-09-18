@@ -10,8 +10,8 @@
   "link": "https://github.com/kmcsr/smart_servertime_mcdr",
   "dependencies": {
     "mcdreforged": ">=2.0.0",
-    "kpi": ">=1.0.0",
-    "delayexe": ">=1.2.0"
+    "kpi": ">=1.0.1",
+    "delayexe": ">=1.2.1"
   },
   "resources": [
     "LICENSE",

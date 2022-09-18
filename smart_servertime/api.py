@@ -8,6 +8,7 @@ import delayexe
 from . import globals as GL
 from .utils import *
 from .proxy_server import *
+from . import model
 
 __all__ = [
 	'get_proxy_server', 'refresh_cooldown', 'stop_cooldown', 'proxy_server', 'start_server'
@@ -40,6 +41,8 @@ def on_load(server: MCDR.PluginServerInterface):
 	# 	proxy_server(server.get_plugin_command_source())
 	# else:
 	cooldown_timer.d = new_timer(GL.get_config().server_startup_protection * 60, refresh_cooldown)
+	if GL.get_config().enable_proxy:
+		get_proxy_server().start(server)
 
 @new_thread
 def on_unload(server: MCDR.PluginServerInterface):
@@ -51,11 +54,14 @@ def on_unload(server: MCDR.PluginServerInterface):
 
 def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
 	stop_cooldown()
+	model.joined(player)
+
+def on_player_left(server: MCDR.PluginServerInterface, player: str):
+	model.left(player)
 
 @new_thread
 def on_server_start(server: MCDR.PluginServerInterface):
-	if get_proxy_server().running:
-		get_proxy_server().stop()
+	get_proxy_server().on_server_start()
 	with cooldown_timer:
 		if cooldown_timer.d is not None:
 			cooldown_timer.d.cancel()
@@ -71,18 +77,21 @@ def proxy_server(source: MCDR.CommandSource):
 
 	server = source.get_server()
 	if server.is_server_running():
+		debug('Stopping server')
 		server.stop()
+		debug('Waiting server stop')
 		server.wait_for_start()
 	pxs = get_proxy_server()
-	pxs.start(server)
+	pxs.on_server_sleep(server)
 	pxs.trigger_call(lambda: start_server(server.get_plugin_command_source()))
 
 @new_thread
 @job_mnr.new('start server', block=True)
 def start_server(source: MCDR.CommandSource):
+	debug('Starting server')
 	server = source.get_server()
 	if server.is_server_running():
 		send_message(source, MCDR.RText('[WARN] Server is already started', color=MCDR.RColor.yellow))
 		return
-	get_proxy_server().stop()
+	get_proxy_server().on_server_start()
 	server.start()

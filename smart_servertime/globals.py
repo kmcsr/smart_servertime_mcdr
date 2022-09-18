@@ -13,7 +13,7 @@ MSG_ID = MCDR.RText('[SST]', color=MCDR.RColor.light_purple)
 BIG_BLOCK_BEFOR = '------------ {0} v{1} ::::'
 BIG_BLOCK_AFTER = ':::: {0} v{1} ============'
 
-class SSTConfig(Config):
+class SSTConfig(Config, msg_id=MSG_ID):
 	server_startup_protection: int = 10 # 10 minutes
 	server_cooldown_prepare: int = 10 # 10 minutes
 	# 0:guest 1:user 2:helper 3:admin 4:owner

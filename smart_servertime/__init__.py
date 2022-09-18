@@ -31,3 +31,6 @@ def on_server_stop(server: MCDR.PluginServerInterface, code: int):
 
 def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
 	api.on_player_joined(server, player, info)
+
+def on_player_left(server: MCDR.PluginServerInterface, player: str):
+	api.on_player_left(server, player)
