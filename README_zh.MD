@@ -4,7 +4,9 @@
 
 # Smart Server Time
 
-### 特性
+*如果本插件有用, 请给个star吧 :)*
+
+## 特性
 
 - 当**所有玩家**离开服务器后, *自动停止*服务器
 - 大量节省您服务器的CPU :)
@@ -14,6 +16,12 @@
 - 支持解析*Minecraft消息包*, 可以***正常返回**Ping请求*, 并对*尝试连接的玩家*给予服务器**状态提示**
 - 支持**无缝反向代理**模式 _(需将`enable_proxy`设为`true`)_
 
-### 计划中
+## 依赖
 
-- 添加 *IP/玩家* 黑名单, 避免您的服务器休眠时被攻击
+| ID | 下载链接 |
+|----|---------|
+| [kpi](https://github.com/kmcsr/kpi_mcdr) | <https://github.com/kmcsr/kpi_mcdr/releases> |
+| [delayexe](https://github.com/kmcsr/delayexe_mcdr) | <https://github.com/kmcsr/delayexe_mcdr/releases> |
+| [loginproxy](https://github.com/kmcsr/login_proxy_mcdr) | <https://github.com/kmcsr/login_proxy_mcdr/releases> |
+
+## 计划中

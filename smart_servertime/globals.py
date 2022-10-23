@@ -27,11 +27,6 @@ class SSTConfig(Config, msg_id=MSG_ID):
 		'reload':   3,
 		'save':     3,
 	}
-	enable_proxy: bool = False
-	proxy_addr: dict = {
-		'ip': '127.0.0.1',
-		'port': 25565
-	}
 
 def get_config():
 	return SSTConfig.instance()

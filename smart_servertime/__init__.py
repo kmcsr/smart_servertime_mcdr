@@ -26,6 +26,9 @@ def on_unload(server: MCDR.PluginServerInterface):
 def on_server_start(server: MCDR.PluginServerInterface):
 	api.on_server_start(server)
 
+def on_server_startup(server: MCDR.PluginServerInterface):
+	api.on_server_startup(server)
+
 def on_server_stop(server: MCDR.PluginServerInterface, code: int):
 	api.on_server_stop(server, code)
 

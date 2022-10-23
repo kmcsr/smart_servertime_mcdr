@@ -4,7 +4,9 @@
 
 # Smart Server Time
 
-### Feature
+*If it's useful, please give a star :)*
+
+## Feature
 
 - Server will stop automagically when **all players leave** the server
 - Massive savings on your server's CPU :)
@@ -14,6 +16,12 @@
 - Support *Minecraft Client Packet*, response ***correctly** ping request*, **send server status to player** who is *tring connect*
 - Supports **reverse proxy** mode _(`enable_proxy` need to be set to `true`)_
 
-### TODO
+## Dependencies
 
-- Add *IP/player* blacklist, protect your server when it's sleeping
+| ID | Release Link |
+|----|--------------|
+| [kpi](https://github.com/kmcsr/kpi_mcdr) | <https://github.com/kmcsr/kpi_mcdr/releases> |
+| [delayexe](https://github.com/kmcsr/delayexe_mcdr) | <https://github.com/kmcsr/delayexe_mcdr/releases> |
+| [loginproxy](https://github.com/kmcsr/login_proxy_mcdr) | <https://github.com/kmcsr/login_proxy_mcdr/releases> |
+
+## TODO

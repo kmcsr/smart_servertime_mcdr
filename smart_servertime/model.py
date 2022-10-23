@@ -4,12 +4,13 @@ import time
 from .utils import *
 
 __all__ = [
-	'joined', 'left'
+	'joined', 'left', 'server_startup'
 ]
 
 count = 0
 player_count_data = []
 player_log_data = {}
+server_start_durs = []
 
 def joined(player: str):
 	global count
@@ -39,3 +40,6 @@ def left(player: str = None):
 			log_warn(f"[SST] Player {player} seems haven't count in")
 		else:
 			player_log_data[player][-1][1] = now
+
+def serevr_startup(durt: float):
+	server_start_durs.append(durt)
