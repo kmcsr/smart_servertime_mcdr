@@ -11,9 +11,6 @@ def on_load(server: MCDR.PluginServerInterface, prev_module):
 		log_info('Smart server time is on LOAD')
 	else:
 		log_info('Smart server time is on RELOAD')
-		ps = prev_module.api.get_proxy_server()
-		if ps.running:
-			ps.stop(True)
 	GL.init(server)
 	api.on_load(server)
 	CMD.register(server)
