@@ -78,16 +78,18 @@ def on_server_start(server: MCDR.PluginServerInterface):
 
 @new_thread
 def on_server_startup(server: MCDR.PluginServerInterface):
+	start: float
+	with server_start_time:
+		if server_start_time.d is None:
+			return
+		start = server_start_time.d
+		server_start_time.d = None
 	now = time.time()
 	with cooldown_timer:
 		if cooldown_timer.d is not None:
 			cooldown_timer.d.cancel()
 		cooldown_timer.d = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
-	durt: float
-	with server_start_time:
-		durt = now - server_start_time.d
-		server_start_time.d = None
-
+	durt = now - start
 	log_info('Server started up, used {:.02f}s'.format(durt))
 	model.serevr_startup(durt)
 
