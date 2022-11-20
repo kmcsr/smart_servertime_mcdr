@@ -55,8 +55,9 @@ def on_unload(server: MCDR.PluginServerInterface):
 		cooldown_timer.d = None
 
 	pxs = get_proxy()
-	pxs.on_login.remove(_on_login_listener)
-	pxs.on_ping.remove(_on_ping_listener)
+	if pxs is not None:
+		pxs.on_login.remove(_on_login_listener)
+		pxs.on_ping.remove(_on_ping_listener)
 
 def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
 	stop_cooldown()
