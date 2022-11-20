@@ -4,6 +4,7 @@ import mcdreforged.api.all as MCDR
 from .globals import *
 from .utils import *
 from .api import *
+from .api import cooldown_timer
 
 Prefix = '!!sst'
 
