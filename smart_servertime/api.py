@@ -136,13 +136,26 @@ def _on_login_listener0(source: MCDR.CommandSource):
 _on_login_listener = None
 
 def _on_ping_listener(self, conn, addr: tuple[str, int], login_data: dict, res: dict):
-	res['players'] = {
-		'max': 0,
-		'online': 0,
-		'sample': [
-			{
-				'name': 'Server stopped, please join the game to start the server',
-				'id': '00000000-0000-0000-0000-000000000000'
-			}
-		]
-	}
+	if server.is_server_running():
+		res['version']['name'] = 'Starting'
+		res['players'] = {
+			'max': 0,
+			'online': 0,
+			'sample': [
+				{
+					'name': 'Server is starting, please wait a few minutes and retry',
+					'id': '00000000-0000-0000-0000-000000000000'
+				}
+			]
+		}
+	else:
+		res['players'] = {
+			'max': 0,
+			'online': 0,
+			'sample': [
+				{
+					'name': 'Server stopped, please join the game to start the server',
+					'id': '00000000-0000-0000-0000-000000000000'
+				}
+			]
+		}

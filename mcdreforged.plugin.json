@@ -1,6 +1,6 @@
 {
   "id": "smart_servertime",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "name": "SmartServerTime",
   "description": {
     "en_us": "A Minecraft Auto Start/Stop Plugin",
