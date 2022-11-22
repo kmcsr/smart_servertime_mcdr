@@ -136,7 +136,7 @@ def _on_login_listener0(source: MCDR.CommandSource):
 _on_login_listener = None
 
 def _on_ping_listener(self, conn, addr: tuple[str, int], login_data: dict, res: dict):
-	if server.is_server_running():
+	if MCDR.ServerInterface.get_instance().is_server_running():
 		res['version']['name'] = 'Starting'
 		res['players'] = {
 			'max': 0,
