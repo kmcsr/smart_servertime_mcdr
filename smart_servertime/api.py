@@ -125,7 +125,8 @@ def start_server(source: MCDR.CommandSource):
 
 def _on_login_listener0(source: MCDR.CommandSource):
 	def cb(self, conn, addr: tuple[str, int], name: str, login_data: dict) -> bool:
-		start_server(source)
+		if not server.is_server_running():
+			start_server(source)
 		send_package(conn, 0x00, encode_json({
 			'text': 'Server is starting, please wait a few minutes and retry'
 		}))
