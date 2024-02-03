@@ -4,7 +4,7 @@ import time
 
 import mcdreforged.api.all as MCDR
 
-from loginproxy import get_proxy
+import loginproxy
 from loginproxy.encoder import send_package, encode_json
 from .globals import *
 from .utils import *
@@ -85,7 +85,7 @@ def stop_server(source: MCDR.CommandSource):
 		send_message(source, MCDR.RText('[WARN] Server is already stopped', color=MCDR.RColor.yellow))
 		return
 	debug('Kicking all players')
-	pxs = get_proxy()
+	pxs = loginproxy.get_proxy()
 	for c in pxs.get_conns():
 		c.kick('Server stopping')
 	debug('Stopping server')
