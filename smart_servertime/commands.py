@@ -1,7 +1,7 @@
 
 import mcdreforged.api.all as MCDR
 
-import globals as glb
+from . import globals as glb
 from .globals import *
 from .utils import *
 from .api import *
