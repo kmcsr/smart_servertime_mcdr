@@ -4,9 +4,8 @@ import time
 
 import mcdreforged.api.all as MCDR
 
-import delayexe
 from loginproxy import get_proxy
-from loginproxy.encoder import *
+from loginproxy.encoder import send_package, encode_json
 from .globals import *
 from .utils import *
 from . import model
@@ -15,49 +14,36 @@ __all__ = [
 	'refresh_cooldown', 'stop_cooldown', 'stop_server', 'start_server'
 ]
 
-cooldown_timer = LockedData(None)
-server_start_time = LockedData(None)
+cooldown_timer = None
+server_start_time = None
 
 def _timed_proxy_server():
 	global cooldown_timer
-	cooldown_timer.d = None
+	cooldown_timer = None
+	log_warn('Countdown finished, server stopping')
 	stop_server(MCDR.ServerInterface.get_instance().get_plugin_command_source())
 
 def refresh_cooldown(timeout: int = None):
-	with cooldown_timer:
-		if cooldown_timer.d is not None:
-			cooldown_timer.d.cancel()
-		cooldown_timer.d = new_timer((get_config().server_cooldown_prepare if timeout is None else timeout) * 60, _timed_proxy_server)
+	global cooldown_timer
+	log_info('Starting stop countdown')
+	if cooldown_timer is not None:
+		cooldown_timer.cancel()
+	cooldown_timer = new_timer((get_config().server_cooldown_prepare if timeout is None else timeout) * 60, _timed_proxy_server)
 
 def stop_cooldown():
 	global cooldown_timer
-	if cooldown_timer.d is not None:
-		with cooldown_timer:
-			if cooldown_timer.d is not None:
-				cooldown_timer.d.cancel()
-				cooldown_timer.d = None
+	if cooldown_timer is not None:
+		cooldown_timer.cancel()
+		cooldown_timer = None
 
 def on_load(server: MCDR.PluginServerInterface):
-	global _on_login_listener
-	server.register_event_listener(delayexe.ON_LAST_PLAYER_LEAVE, lambda *args: refresh_cooldown())
-	cooldown_timer.d = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
+	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
+	server.register_event_listener(loginproxy.ON_LOGIN, _on_login_listener0(server.get_plugin_command_source()))
+	server.register_event_listener(loginproxy.ON_LOGOFF, lambda s, _: s.get_conn_count() == 0 and refresh_cooldown())
+	cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
 
-	pxs = get_proxy()
-	_on_login_listener = _on_login_listener0(server.get_plugin_command_source())
-	pxs.on_login.append(_on_login_listener)
-	pxs.on_ping.append(_on_ping_listener)
-
-@new_thread
 def on_unload(server: MCDR.PluginServerInterface):
-	global cooldown_timer
-	if cooldown_timer.d is not None:
-		cooldown_timer.d.cancel()
-		cooldown_timer.d = None
-
-	pxs = get_proxy()
-	if pxs is not None:
-		pxs.on_login.remove(_on_login_listener)
-		pxs.on_ping.remove(_on_ping_listener)
+	stop_cooldown()
 
 def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR.Info):
 	stop_cooldown()
@@ -66,55 +52,45 @@ def on_player_joined(server: MCDR.PluginServerInterface, player: str, info: MCDR
 def on_player_left(server: MCDR.PluginServerInterface, player: str):
 	model.left(player)
 
-@new_thread
 def on_server_start(server: MCDR.PluginServerInterface):
+	global server_start_time
 	now = time.time()
-	with cooldown_timer:
-		if cooldown_timer.d is not None:
-			cooldown_timer.d.cancel()
-			cooldown_timer.d = None
-	with server_start_time:
-		server_start_time.d = now
+	stop_cooldown()
+	server_start_time = now
 
-@new_thread
 def on_server_startup(server: MCDR.PluginServerInterface):
+	global server_start_time, cooldown_timer
 	start: float
-	with server_start_time:
-		if server_start_time.d is None:
-			return
-		start = server_start_time.d
-		server_start_time.d = None
+	if server_start_time is None:
+		return
+	start = server_start_time
+	server_start_time = None
+
 	now = time.time()
-	with cooldown_timer:
-		if cooldown_timer.d is not None:
-			cooldown_timer.d.cancel()
-		cooldown_timer.d = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
-	durt = now - start
-	log_info('Server started up, used {:.02f}s'.format(durt))
-	model.serevr_startup(durt)
+	if cooldown_timer is not None:
+		cooldown_timer.cancel()
+	cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
+	dur = now - start
+	log_info('Server started up, used {:.02f}s'.format(dur))
+	model.serevr_startup(dur)
 
 def on_server_stop(server: MCDR.PluginServerInterface, code: int):
 	stop_cooldown()
 
-@new_thread
-@job_mnr.new('proxy server')
 def stop_server(source: MCDR.CommandSource):
 	stop_cooldown()
 
 	server = source.get_server()
 	if not server.is_server_running():
+		send_message(source, MCDR.RText('[WARN] Server is already stopped', color=MCDR.RColor.yellow))
 		return
 	debug('Kicking all players')
 	pxs = get_proxy()
 	for c in pxs.get_conns():
-		c.kick()
+		c.kick('Server stopping')
 	debug('Stopping server')
 	server.stop()
-	debug('Waiting server stop')
-	server.wait_for_start()
 
-@new_thread
-@job_mnr.new('start server', block=True)
 def start_server(source: MCDR.CommandSource):
 	debug('Starting server')
 	server = source.get_server()
@@ -124,6 +100,7 @@ def start_server(source: MCDR.CommandSource):
 	server.start()
 
 def _on_login_listener0(source: MCDR.CommandSource):
+	server = source.get_server()
 	def cb(self, conn, addr: tuple[str, int], name: str, login_data: dict) -> bool:
 		if not server.is_server_running():
 			start_server(source)
@@ -133,8 +110,6 @@ def _on_login_listener0(source: MCDR.CommandSource):
 		conn.close()
 		return True
 	return cb
-
-_on_login_listener = None
 
 def _on_ping_listener(self, conn, addr: tuple[str, int], login_data: dict, res: dict):
 	if MCDR.ServerInterface.get_instance().is_server_running():

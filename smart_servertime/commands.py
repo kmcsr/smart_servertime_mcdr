@@ -1,6 +1,7 @@
 
 import mcdreforged.api.all as MCDR
 
+import globals as glb
 from .globals import *
 from .utils import *
 from .api import *
@@ -24,17 +25,12 @@ def register(server: MCDR.PluginServerInterface):
 	)
 
 def command_help(source: MCDR.CommandSource):
-	send_message(source, BIG_BLOCK_BEFOR, tr('help_msg', Prefix), BIG_BLOCK_AFTER, sep='\n')
+	send_message(source, glb.BIG_BLOCK_BEFOR, tr('help_msg', Prefix), glb.BIG_BLOCK_AFTER, sep='\n')
 
 def command_wakeup(source: MCDR.CommandSource):
-	debug('command wakeup')
 	start_server(source)
 
 def command_stop(source: MCDR.CommandSource):
-	server = source.get_server()
-	if not server.is_server_running():
-		send_message(source, MCDR.RText('[WARN] Server is already stopped', color=MCDR.RColor.yellow))
-		return
 	stop_server(source)
 
 def command_refresh(source: MCDR.CommandSource, timeout: int = None):
