@@ -11,7 +11,7 @@
   "dependencies": {
     "mcdreforged": ">=2.0.0",
     "kpi": ">=1.3.2",
-    "loginproxy": ">=0.6.6"
+    "loginproxy": ">=0.6.9"
   },
   "resources": [
     "LICENSE",
