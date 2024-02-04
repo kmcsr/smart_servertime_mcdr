@@ -35,6 +35,7 @@ def stop_cooldown():
 	if cooldown_timer is not None:
 		cooldown_timer.cancel()
 		cooldown_timer = None
+		log_info('Countdown canceled')
 
 def on_load(server: MCDR.PluginServerInterface):
 	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
@@ -103,10 +104,11 @@ def _on_login_listener0(source: MCDR.CommandSource):
 	def cb(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], name: str, login_data: dict, canceler) -> bool:
 		if not server.is_server_running():
 			start_server(source)
-		send_package(conn, 0x00, encode_json({
-			'text': 'Server is starting, please wait a few minutes and retry'
-		}))
-		canceler()
+		if not server.is_server_startup():
+			send_package(conn, 0x00, encode_json({
+				'text': 'Server is starting, please wait a few minutes and retry'
+			}))
+			canceler()
 	return cb
 
 def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, res: dict):
