@@ -40,7 +40,7 @@ def stop_cooldown():
 def on_load(server: MCDR.PluginServerInterface):
 	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
 	server.register_event_listener(loginproxy.ON_LOGIN, _on_login_listener0(server.get_plugin_command_source()))
-	server.register_event_listener(loginproxy.ON_LOGOFF, lambda _, s: s.get_conn_count() == 0 and refresh_cooldown())
+	server.register_event_listener(loginproxy.ON_LOGOFF, lambda server, pxs, conn: pxs.get_conn_count() == 0 and refresh_cooldown())
 	cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
 
 def on_unload(server: MCDR.PluginServerInterface):
@@ -109,6 +109,8 @@ def _on_login_listener0(source: MCDR.CommandSource):
 				'text': 'Server is starting, please wait a few minutes and retry'
 			}))
 			canceler()
+			return
+		stop_cooldown()
 	return cb
 
 def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, res: dict):
