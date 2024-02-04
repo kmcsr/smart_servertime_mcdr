@@ -39,7 +39,7 @@ def stop_cooldown():
 def on_load(server: MCDR.PluginServerInterface):
 	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
 	server.register_event_listener(loginproxy.ON_LOGIN, _on_login_listener0(server.get_plugin_command_source()))
-	server.register_event_listener(loginproxy.ON_LOGOFF, lambda s, _: s.get_conn_count() == 0 and refresh_cooldown())
+	server.register_event_listener(loginproxy.ON_LOGOFF, lambda _, s: s.get_conn_count() == 0 and refresh_cooldown())
 	cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
 
 def on_unload(server: MCDR.PluginServerInterface):
@@ -100,8 +100,7 @@ def start_server(source: MCDR.CommandSource):
 	server.start()
 
 def _on_login_listener0(source: MCDR.CommandSource):
-	server = source.get_server()
-	def cb(self, conn, addr: tuple[str, int], name: str, login_data: dict) -> bool:
+	def cb(server: MCDR.PluginServerInterface, self, conn, addr: tuple[str, int], name: str, login_data: dict) -> bool:
 		if not server.is_server_running():
 			start_server(source)
 		send_package(conn, 0x00, encode_json({
@@ -111,7 +110,7 @@ def _on_login_listener0(source: MCDR.CommandSource):
 		return True
 	return cb
 
-def _on_ping_listener(self, conn, addr: tuple[str, int], login_data: dict, res: dict):
+def _on_ping_listener(server: MCDR.PluginServerInterface, self, conn, addr: tuple[str, int], login_data: dict, res: dict):
 	if MCDR.ServerInterface.get_instance().is_server_running():
 		res['version']['name'] = 'Starting'
 		res['players'] = {
