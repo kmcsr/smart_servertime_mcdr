@@ -106,8 +106,7 @@ def _on_login_listener0(source: MCDR.CommandSource):
 		send_package(conn, 0x00, encode_json({
 			'text': 'Server is starting, please wait a few minutes and retry'
 		}))
-		conn.close()
-		return True
+		canceler()
 	return cb
 
 def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, res: dict):
