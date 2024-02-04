@@ -100,7 +100,7 @@ def start_server(source: MCDR.CommandSource):
 	server.start()
 
 def _on_login_listener0(source: MCDR.CommandSource):
-	def cb(server: MCDR.PluginServerInterface, self, conn, addr: tuple[str, int], name: str, login_data: dict) -> bool:
+	def cb(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], name: str, login_data: dict, canceler) -> bool:
 		if not server.is_server_running():
 			start_server(source)
 		send_package(conn, 0x00, encode_json({
@@ -110,7 +110,7 @@ def _on_login_listener0(source: MCDR.CommandSource):
 		return True
 	return cb
 
-def _on_ping_listener(server: MCDR.PluginServerInterface, self, conn, addr: tuple[str, int], login_data: dict, res: dict):
+def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, res: dict):
 	if MCDR.ServerInterface.get_instance().is_server_running():
 		res['version']['name'] = 'Starting'
 		res['players'] = {
