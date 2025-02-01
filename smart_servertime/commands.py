@@ -33,7 +33,7 @@ def command_wakeup(source: MCDR.CommandSource):
 def command_stop(source: MCDR.CommandSource):
 	stop_server(source)
 
-def command_refresh(source: MCDR.CommandSource, timeout: int = None):
+def command_refresh(source: MCDR.CommandSource, timeout: int | None = None):
 	server = source.get_server()
 	if not server.is_server_running():
 		send_message(source, MCDR.RText('[WARN] Server is already stopped, are you mean `{0} wakeup`?'.format(Prefix), color=MCDR.RColor.yellow))
@@ -46,8 +46,10 @@ def command_refresh(source: MCDR.CommandSource, timeout: int = None):
 
 @new_thread
 def command_config_reload(source: MCDR.CommandSource):
-	SSTConfig.load(source)
+	get_config().load()
+	send_message(source, MSG_ID, 'Config file reloaded')
 
 @new_thread
 def command_config_save(source: MCDR.CommandSource):
-	get_config().save(source)
+	get_config().save()
+	send_message(source, MSG_ID, 'Config file saved')

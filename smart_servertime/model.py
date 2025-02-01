@@ -8,9 +8,9 @@ __all__ = [
 ]
 
 count = 0
-player_count_data = []
-player_log_data = {}
-server_start_durs = []
+player_count_data: list[tuple[int, int]] = []
+player_log_data: dict = {}
+server_start_durs: list[float] = []
 
 def joined(player: str):
 	global count
@@ -22,7 +22,7 @@ def joined(player: str):
 	else:
 		player_log_data[player].append([now, None])
 
-def left(player: str = None):
+def left(player: str | None = None):
 	global count
 	now = int(time.time())
 	if player is None:

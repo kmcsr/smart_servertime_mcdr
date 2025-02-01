@@ -29,8 +29,8 @@ class SSTConfig(Config, msg_id=MSG_ID):
 	server_startup_protection: int = 10 # 10 minutes
 	server_cooldown_prepare: int = 10 # 10 minutes
 
-def get_config():
-	return SSTConfig.instance
+def get_config() -> SSTConfig:
+	return SSTConfig.instance()
 
 def init(server: MCDR.PluginServerInterface):
 	global BIG_BLOCK_BEFOR, BIG_BLOCK_AFTER
