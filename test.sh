@@ -1,18 +1,22 @@
 #!/bin/bash
 
+minecraft_version=1.19.2
+
 cd $(dirname $0)
 BASE_DIR=$(pwd)
-mkdir -p test
-cd test
+mkdir -p _test
+cd _test
 
 function set_mcdr_config(){
 	while IFS='' read line; do
-		if [[ "${line}" == 'advanced_console:'* ]]; then
-			echo 'advanced_console: false'
-		elif [[ "${line}" == 'check_update:'* ]]; then
+		if [[ "${line}" == 'check_update:'* ]]; then
 			echo 'check_update: false'
-		elif [[ "${line}" == 'disable_console_color:'* ]]; then
-			echo 'disable_console_color: true'
+		# elif [[ "${line}" == 'advanced_console:'* ]]; then
+		# 	echo 'advanced_console: false'
+		# elif [[ "${line}" == 'disable_console_color:'* ]]; then
+		# 	echo 'disable_console_color: true'
+		elif [[ "${line}" == 'start_command:'* ]]; then
+			echo "start_command: ['java', '-Xms1G', '-Xmx2G', '-jar', 'minecraft_server.jar', 'nogui']"
 		elif [[ "${line}" == 'debug:'* ]]; then
 			echo "${line}"
 			IFS='' read line
@@ -38,17 +42,12 @@ if ! [ -f config.yml ]; then
 	set_mcdr_config
 fi
 
-if ! [ -n "$SERVER_URL" ]; then
-	SERVER_URL=https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar
-fi
 SERVER_DIR=server
-SERVRE_JAR=$SERVER_DIR/minecraft_server.jar
+SERVER_EXE_NAME=minecraft_server
 
-if ! [ -f "$SERVRE_JAR" ]; then
-	echo "==> Getting '$SERVER_URL'"
-	if ! wget -O "$SERVRE_JAR" "$SERVER_URL" 2>/dev/null; then
-		curl -L --output "$SERVRE_JAR" "$SERVER_URL" || exit $?
-	fi
+if ! [ -f "$SERVER_DIR/$SERVER_EXE_NAME.jar" ]; then
+	echo "==> Getting minecraft $minecraft_version"
+	minecraft_installer -output "$SERVER_DIR" -name="$SERVER_EXE_NAME" -version "$minecraft_version" vanilla
 fi
 
 echo '==> Packing plugin'

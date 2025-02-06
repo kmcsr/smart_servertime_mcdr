@@ -36,7 +36,7 @@ def command_stop(source: MCDR.CommandSource):
 def command_refresh(source: MCDR.CommandSource, timeout: int | None = None):
 	server = source.get_server()
 	if not server.is_server_running():
-		send_message(source, MCDR.RText('[WARN] Server is already stopped, are you mean `{0} wakeup`?'.format(Prefix), color=MCDR.RColor.yellow))
+		send_message(source, MCDR.RText('[WARN] Server is already stopped, did you mean `{0} wakeup`?'.format(Prefix), color=MCDR.RColor.yellow))
 		return
 	if cooldown_timer is None:
 		send_message(source, MCDR.RText('[WARN] Cooldown timer is not start', color=MCDR.RColor.yellow))
