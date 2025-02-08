@@ -5,7 +5,7 @@ import time
 import mcdreforged.api.all as MCDR
 
 import loginproxy
-from loginproxy.encoder import send_package, encode_json
+from loginproxy.encoder import send_package, encode_json, ServerStatus
 from .globals import *
 from .utils import *
 from . import model
@@ -40,7 +40,7 @@ def stop_cooldown():
 
 def on_load(server: MCDR.PluginServerInterface):
 	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
-	server.register_event_listener(loginproxy.ON_PRELOGIN, _on_login_listener0(server.get_plugin_command_source()))
+	server.register_event_listener(loginproxy.ON_PRE_LOGIN, _on_login_listener)
 	server.register_event_listener(loginproxy.ON_LOGOFF, lambda server, conn: conn.server.get_conn_count() == 0 and refresh_cooldown())
 	if loginproxy.get_proxy().get_conn_count() == 0:
 		cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
@@ -104,41 +104,33 @@ def start_server(source: MCDR.CommandSource):
 		return
 	server.start()
 
-def _on_login_listener0(source: MCDR.CommandSource):
-	def cb(server: MCDR.PluginServerInterface, proxy: loginproxy.ProxyServer, conn, addr: tuple[str, int], name: str, login_data: dict, canceler):
-		if not server.is_server_running():
-			start_server(source)
-		if not server.is_server_startup():
-			send_package(conn, 0x00, encode_json({
-				'text': 'Server is starting, please wait a few minutes and retry\n' +
-					f'Estimate startup time {estimate_start_dur / 60:.2f}min'
-			}))
-			canceler()
-			return
-		stop_cooldown()
-	return cb
-
-def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, res: dict):
+def _on_ping_listener(server: MCDR.PluginServerInterface, proxy, conn, addr: tuple[str, int], login_data: dict, status: ServerStatus):
 	if server.is_server_running():
-		res['version']['name'] = 'Starting'
-		res['players'] = {
-			'max': 0,
-			'online': 0,
-			'sample': [
-				{
-					'name': 'Server is starting, please wait a few minutes and retry',
-					'id': '00000000-0000-0000-0000-000000000000'
-				}
-			]
-		}
+		status.version = 'Starting'
+		status.max_player = 0
+		status.online_player = 0
+		status.sample_players = [
+			{
+				'name': 'Server is starting, please wait a few minutes and retry',
+				'id': '00000000-0000-0000-0000-000000000000'
+			}
+		]
 	else:
-		res['players'] = {
-			'max': 0,
-			'online': 0,
-			'sample': [
-				{
-					'name': 'Server stopped, please join the game to start the server',
-					'id': '00000000-0000-0000-0000-000000000000'
-				}
-			]
-		}
+		status.sample_players = [
+			{
+				'name': 'Server stopped, please join the game to start the server',
+				'id': '00000000-0000-0000-0000-000000000000'
+			}
+		]
+
+def _on_login_listener(server: MCDR.PluginServerInterface, proxy: loginproxy.ProxyServer, conn, addr: tuple[str, int], name: str, login_data: dict, cancel):
+	if not server.is_server_running():
+		start_server(server.get_plugin_command_source())
+	if not server.is_server_startup():
+		send_package(conn, 0x00, encode_json({
+			'text': 'Server is starting, please wait a few minutes and retry\n' +
+				f'Estimate startup time {estimate_start_dur / 60:.2f}min'
+		}))
+		cancel()
+		return
+	stop_cooldown()

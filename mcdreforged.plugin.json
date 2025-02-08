@@ -1,6 +1,6 @@
 {
   "id": "smart_servertime",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "name": "SmartServerTime",
   "description": {
     "en_us": "A Minecraft Auto Start/Stop Plugin",
@@ -11,7 +11,7 @@
   "dependencies": {
     "mcdreforged": "^2.14.0",
     "kpi": "~1.5.0",
-    "loginproxy": "~0.7.3"
+    "loginproxy": "~0.8.0"
   },
   "resources": [
     "LICENSE",
