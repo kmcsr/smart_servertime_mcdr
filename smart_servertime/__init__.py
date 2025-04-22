@@ -1,7 +1,7 @@
 
 import mcdreforged.api.all as MCDR
 
-from . import globals as GL
+from . import configs
 from .utils import *
 from . import commands as CMD
 from . import api
@@ -11,14 +11,14 @@ def on_load(server: MCDR.PluginServerInterface, prev_module):
 		log_info('Smart server time is on LOAD')
 	else:
 		log_info('Smart server time is on RELOAD')
-	GL.init(server)
+	configs.init(server)
 	api.on_load(server)
 	CMD.register(server)
 
 def on_unload(server: MCDR.PluginServerInterface):
 	log_info('Smart server time is on UNLOAD')
 	api.on_unload(server)
-	GL.destory(server)
+	configs.destory(server)
 
 def on_server_start(server: MCDR.PluginServerInterface):
 	api.on_server_start(server)

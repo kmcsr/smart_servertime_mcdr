@@ -6,7 +6,7 @@ import mcdreforged.api.all as MCDR
 
 import loginproxy
 from loginproxy.encoder import send_package, encode_json, ServerStatus
-from .globals import *
+from .configs import *
 from .utils import *
 from . import model
 
@@ -39,9 +39,10 @@ def stop_cooldown():
 		log_info('Countdown canceled')
 
 def on_load(server: MCDR.PluginServerInterface):
+	global cooldown_timer
 	server.register_event_listener(loginproxy.ON_PING, _on_ping_listener)
 	server.register_event_listener(loginproxy.ON_PRE_LOGIN, _on_login_listener)
-	server.register_event_listener(loginproxy.ON_LOGOFF, lambda server, conn: conn.server.get_conn_count() == 0 and refresh_cooldown())
+	server.register_event_listener(loginproxy.ON_LOGOFF, _on_logoff_listener)
 	if loginproxy.get_proxy().get_conn_count() == 0:
 		cooldown_timer = new_timer(get_config().server_startup_protection * 60, refresh_cooldown)
 
@@ -129,8 +130,13 @@ def _on_login_listener(server: MCDR.PluginServerInterface, proxy: loginproxy.Pro
 	if not server.is_server_startup():
 		send_package(conn, 0x00, encode_json({
 			'text': 'Server is starting, please wait a few minutes and retry\n' +
-				f'Estimate startup time {estimate_start_dur / 60:.2f}min'
+				'Estimate startup time {estimate:.2f}min'.format(estimate=estimate_start_dur / 60)
 		}))
 		cancel()
 		return
 	stop_cooldown()
+
+def _on_logoff_listener(server: MCDR.PluginServerInterface, conn: loginproxy.Conn):
+	if conn.server.get_conn_count() == 0:
+		refresh_cooldown()
+		return

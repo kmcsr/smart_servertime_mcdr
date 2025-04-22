@@ -1,8 +1,8 @@
 
 import mcdreforged.api.all as MCDR
 
-from . import globals as glb
-from .globals import *
+from . import configs
+from .configs import *
 from .utils import *
 from .api import *
 from .api import cooldown_timer
@@ -25,7 +25,7 @@ def register(server: MCDR.PluginServerInterface):
 	)
 
 def command_help(source: MCDR.CommandSource):
-	send_message(source, glb.BIG_BLOCK_BEFOR, tr('help_msg', Prefix), glb.BIG_BLOCK_AFTER, sep='\n')
+	send_message(source, configs.BIG_BLOCK_BEFOR, tr('help_msg', Prefix), configs.BIG_BLOCK_AFTER, sep='\n')
 
 def command_wakeup(source: MCDR.CommandSource):
 	start_server(source)

@@ -14,14 +14,12 @@
 - Support server **cooldown timeout**
 - Support **manually start/stop** your server
 - Support *Minecraft Client Packet*, response ***correctly** ping request*, **send server status to player** who is *tring connect*
-- Supports **reverse proxy** mode _(`enable_proxy` need to be set to `true`)_
 
 ## Dependencies
 
 | ID | Release Link |
 |----|--------------|
 | [kpi](https://github.com/kmcsr/kpi_mcdr) | <https://github.com/kmcsr/kpi_mcdr/releases> |
-| [delayexe](https://github.com/kmcsr/delayexe_mcdr) | <https://github.com/kmcsr/delayexe_mcdr/releases> |
 | [loginproxy](https://github.com/kmcsr/login_proxy_mcdr) | <https://github.com/kmcsr/login_proxy_mcdr/releases> |
 
 ## TODO

@@ -14,14 +14,12 @@
 - 支持**延时关闭**服务器
 - 支持*手动启动/关闭*服务器
 - 支持解析*Minecraft消息包*, 可以***正常返回**Ping请求*, 并对*尝试连接的玩家*给予服务器**状态提示**
-- 支持**无缝反向代理**模式 _(需将`enable_proxy`设为`true`)_
 
 ## 依赖
 
 | ID | 下载链接 |
 |----|---------|
 | [kpi](https://github.com/kmcsr/kpi_mcdr) | <https://github.com/kmcsr/kpi_mcdr/releases> |
-| [delayexe](https://github.com/kmcsr/delayexe_mcdr) | <https://github.com/kmcsr/delayexe_mcdr/releases> |
 | [loginproxy](https://github.com/kmcsr/login_proxy_mcdr) | <https://github.com/kmcsr/login_proxy_mcdr/releases> |
 
 ## 计划中
